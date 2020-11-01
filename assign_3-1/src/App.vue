@@ -1,4 +1,3 @@
-//!▼不要なID等は削除すること！
 <template>
    <div id="app">
       <h1>ToDoリスト</h1>
