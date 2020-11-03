@@ -7,6 +7,9 @@ const getters = {
    newItem: state => state.newItem,
 };
 const mutations = {
+   taskToDos: (state, item) => {
+      state.todos.push(item);
+   },
    newItem: (state, addedItem) => {
       state.newItem = addedItem;
    },
