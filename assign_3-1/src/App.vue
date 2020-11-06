@@ -65,28 +65,51 @@ export default {
          },
       },
    },
+   // methods: {
+   //    addTask(event) {
+   //       const item = {
+   //          id: '',
+   //          comment: this.$store.getters['tasks/newItem'],
+   //          working: true,
+   //       };
+
+   //       //-タスクを追加する処理を関数化
+   //       let addTaskDetail = () => {
+   //          // this.$store.state.tasks.todos.push(item);
+   //          this.$store.commit('tasks/taskToDos', item);
+   //          this.newItem = '';
+   //       };
+
+   //       if (event.type === 'click') {
+   //          addTaskDetail();
+   //          return;
+   //       }
+   //       //-日本語入力中に確定した際にEnterキーのトリガーを走らせないようにする処理
+   //       if (event.keyCode !== 13) return;
+   //       addTaskDetail();
+   //    },
+   // },
    methods: {
       addTask(event) {
+         if (event.type === 'click') {
+            this.addTaskDetail();
+            return;
+         }
+         //-日本語入力中に確定した際にEnterキーのトリガーを走らせないようにする処理
+         if (event.keyCode !== 13) return;
+         this.addTaskDetail();
+      },
+
+      //-タスクを追加する処理を関数化
+      addTaskDetail() {
          const item = {
             id: '',
             comment: this.$store.getters['tasks/newItem'],
             working: true,
          };
-
-         //-タスクを追加する処理を関数化
-         let addTaskDetail = () => {
-            // this.$store.state.tasks.todos.push(item);
-            this.$store.commit('tasks/taskToDos', item);
-            this.newItem = '';
-         };
-
-         if (event.type === 'click') {
-            addTaskDetail();
-            return;
-         }
-         //-日本語入力中に確定した際にEnterキーのトリガーを走らせないようにする処理
-         if (event.keyCode !== 13) return;
-         addTaskDetail();
+         // this.$store.state.tasks.todos.push(item);
+         this.$store.commit('tasks/taskToDos', item);
+         this.newItem = '';
       },
    },
 };
