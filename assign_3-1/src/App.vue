@@ -30,12 +30,19 @@
                <tr v-for="(todo, index) in taskToDos" :key="todo.id">
                   <td>{{ (todo.id = index) }}</td>
                   <td>{{ todo.comment }}</td>
-                  <!-- //-完了と作業中のボタンの切り替えをv-ifで行う -->
+                  <!-- //-課題3-3完了と作業中のボタンの切り替え操作 -->
                   <td v-if="todo.working">
-                     <button>作業中</button>
+                     <button @click="changeButtonState(todo)">
+                        作業中
+                     </button>
                   </td>
-                  <td v-else><button>完了</button></td>
-                  <td><button>削除</button></td>
+                  <td v-else>
+                     <!--
+                     <button @click="todo.working = !todo.working">完了</button>
+                   -->
+                     <button @click="changeButtonState(todo)">完了</button>
+                  </td>
+                  <td><button @click="removeTask(index)">削除</button></td>
                </tr>
             </tbody>
          </table>
@@ -64,31 +71,19 @@ export default {
             this.$store.commit('tasks/newItem', value);
          },
       },
+      isActive() {
+         return this.$store.getters['tasks/isActive'];
+      },
+      // TODO //¥¥¥あとで消すこと！！
+      // isActive: {
+      //    get() {
+      //       return this.$store.getters['tasks/isActive'];
+      //    },
+      //    set(value) {
+      //       this.$store.commit('tasks/isActive', value);
+      //    },
+      // },
    },
-   // methods: {
-   //    addTask(event) {
-   //       const item = {
-   //          id: '',
-   //          comment: this.$store.getters['tasks/newItem'],
-   //          working: true,
-   //       };
-
-   //       //-タスクを追加する処理を関数化
-   //       let addTaskDetail = () => {
-   //          // this.$store.state.tasks.todos.push(item);
-   //          this.$store.commit('tasks/taskToDos', item);
-   //          this.newItem = '';
-   //       };
-
-   //       if (event.type === 'click') {
-   //          addTaskDetail();
-   //          return;
-   //       }
-   //       //-日本語入力中に確定した際にEnterキーのトリガーを走らせないようにする処理
-   //       if (event.keyCode !== 13) return;
-   //       addTaskDetail();
-   //    },
-   // },
    methods: {
       addTask(event) {
          if (event.type === 'click') {
@@ -110,6 +105,15 @@ export default {
          // this.$store.state.tasks.todos.push(item);
          this.$store.commit('tasks/taskToDos', item);
          this.newItem = '';
+      },
+      //-課題3-2 タスクの削除機能
+      removeTask(index) {
+         this.$store.commit('tasks/removeTask', index);
+         console.log(this.$store.state.tasks.todos);
+      },
+      //-課題3-3 タスクのボタンの状態変化
+      changeButtonState(todo) {
+         todo.working = !todo.working;
       },
    },
 };
