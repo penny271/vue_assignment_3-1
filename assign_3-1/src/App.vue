@@ -2,9 +2,30 @@
    <div id="app">
       <h1>ToDoリスト</h1>
       <form name="radioConditions">
-         <input type="radio" name="rdo" checked />すべて
-         <input type="radio" name="rdo" />作業中
-         <input type="radio" name="rdo" />完了
+         <input
+            type="radio"
+            id="all"
+            name="rdo"
+            v-model="condition"
+            value="すべて"
+            @click="chosenTasks"
+         /><label for="all">すべて</label>
+         <input
+            type="radio"
+            id="progress"
+            name="rdo"
+            v-model="condition"
+            value="作業中"
+            @click="chosenTasks"
+         /><label for="progress">作業中</label>
+         <input
+            type="radio"
+            id="complete"
+            name="rdo"
+            v-model="condition"
+            value="完了"
+            @click="chosenTasks"
+         /><label for="complete">完了</label>
       </form>
 
       <div>
@@ -18,28 +39,20 @@
                </tr>
             </thead>
             <tbody>
-               <!-- 実装されたイメージを持つために以下を一時的に作成 -->
-               <tr hidden>
-                  <td>0</td>
-                  <td>aaa</td>
-                  <td><button>作業中</button></td>
-                  <td><button>削除</button></td>
-               </tr>
-               <!-- ここまで -->
-
-               <tr v-for="(todo, index) in taskToDos" :key="todo.id">
+               <tr
+                  v-for="(todo, index) in duplicatedTodos"
+                  :key="index"
+                  class="eachTodo"
+               >
                   <td>{{ (todo.id = index) }}</td>
                   <td>{{ todo.comment }}</td>
-                  <!-- //-課題3-3完了と作業中のボタンの切り替え操作 -->
+                  <!-- //-課題3-3完了 作業中のボタンの切り替え操作 -->
                   <td v-if="todo.working">
                      <button @click="changeButtonState(todo)">
                         作業中
                      </button>
                   </td>
                   <td v-else>
-                     <!--
-                     <button @click="todo.working = !todo.working">完了</button>
-                   -->
                      <button @click="changeButtonState(todo)">完了</button>
                   </td>
                   <td><button @click="removeTask(index)">削除</button></td>
@@ -71,28 +84,30 @@ export default {
             this.$store.commit('tasks/newItem', value);
          },
       },
-      isActive() {
-         return this.$store.getters['tasks/isActive'];
+      condition: {
+         get() {
+            return this.$store.getters['tasks/condition'];
+         },
+         set(value) {
+            this.$store.commit('tasks/condition', value);
+         },
       },
-      // TODO //¥¥¥あとで消すこと！！
-      // isActive: {
-      //    get() {
-      //       return this.$store.getters['tasks/isActive'];
-      //    },
-      //    set(value) {
-      //       this.$store.commit('tasks/isActive', value);
-      //    },
-      // },
+      duplicatedTodos() {
+         // return this.$store.state.tasks.duplicatedTodos;
+         return this.$store.getters['tasks/duplicatedTodos'];
+      },
    },
    methods: {
       addTask(event) {
          if (event.type === 'click') {
             this.addTaskDetail();
+            this.chosenTasks();
             return;
          }
          //-日本語入力中に確定した際にEnterキーのトリガーを走らせないようにする処理
          if (event.keyCode !== 13) return;
          this.addTaskDetail();
+         this.chosenTasks();
       },
 
       //-タスクを追加する処理を関数化
@@ -109,17 +124,34 @@ export default {
       //-課題3-2 タスクの削除機能
       removeTask(index) {
          this.$store.commit('tasks/removeTask', index);
-         console.log(this.$store.state.tasks.todos);
       },
       //-課題3-3 タスクのボタンの状態変化
       changeButtonState(todo) {
          todo.working = !todo.working;
       },
+      //! 課題3-4 タスクのソートcommit 下記不可
+      // chosenTasks() {
+      //    this.$store.commit('tasks/chosenTasks')
+      // }
+      //-課題3-4 タスクのソート 下記でも実装可能だった。
+      // chosenTasks() {
+      //    setTimeout(() => {
+      //       this.$store.commit('tasks/chosenTasks');
+      //    }, 20);
+      // },
+      //-課題3-4 タスクのソート dispatchでアクションを実行
+      chosenTasks() {
+         this.$store.dispatch('tasks/chosenTasks')
+      }
    },
 };
 </script>
 
 <style>
+label {
+   margin-right: 5px;
+}
+
 .radios {
    margin: 0;
    padding: 0;
