@@ -1,6 +1,12 @@
 <template>
    <div id="app">
       <h1>ToDoリスト</h1>
+      <h2>watchを使用して実装した場合 - こちらはうまく動きました</h2>
+
+      <!--  @click="chosenTasks(condition)"で
+      conditionをchosenTasksの引数で渡して実装した場合
+      実装できなかった。以下、試したコードです。
+
       <form name="radioConditions">
          <input
             type="radio"
@@ -8,7 +14,7 @@
             name="rdo"
             v-model="condition"
             value="すべて"
-            @click="chosenTasks"
+            @click="chosenTasks(condition)"
          /><label for="all">すべて</label>
          <input
             type="radio"
@@ -16,7 +22,7 @@
             name="rdo"
             v-model="condition"
             value="作業中"
-            @click="chosenTasks"
+            @click="chosenTasks(condition)"
          /><label for="progress">作業中</label>
          <input
             type="radio"
@@ -24,7 +30,33 @@
             name="rdo"
             v-model="condition"
             value="完了"
-            @click="chosenTasks"
+            @click="chosenTasks(condition)"
+         /><label for="complete">完了</label>
+      </form>
+ -->
+
+      <!-- watch用に上記コードを修正：こちらは機能しました。 -->
+      <form name="radioConditions">
+         <input
+            type="radio"
+            id="all"
+            name="rdo"
+            v-model="condition"
+            value="すべて"
+         /><label for="all">すべて</label>
+         <input
+            type="radio"
+            id="progress"
+            name="rdo"
+            v-model="condition"
+            value="作業中"
+         /><label for="progress">作業中</label>
+         <input
+            type="radio"
+            id="complete"
+            name="rdo"
+            v-model="condition"
+            value="完了"
          /><label for="complete">完了</label>
       </form>
 
@@ -72,6 +104,11 @@
 
 <script>
 export default {
+   data() {
+      return {
+         condition: 'すべて',
+      };
+   },
    computed: {
       taskToDos() {
          return this.$store.getters['tasks/taskToDos'];
@@ -84,14 +121,6 @@ export default {
             this.$store.commit('tasks/newItem', value);
          },
       },
-      condition: {
-         get() {
-            return this.$store.getters['tasks/condition'];
-         },
-         set(value) {
-            this.$store.commit('tasks/condition', value);
-         },
-      },
       duplicatedTodos() {
          // return this.$store.state.tasks.duplicatedTodos;
          return this.$store.getters['tasks/duplicatedTodos'];
@@ -101,13 +130,15 @@ export default {
       addTask(event) {
          if (event.type === 'click') {
             this.addTaskDetail();
-            this.chosenTasks();
+            // this.chosenTasks();
+            this.showTasks();
             return;
          }
          //-日本語入力中に確定した際にEnterキーのトリガーを走らせないようにする処理
          if (event.keyCode !== 13) return;
          this.addTaskDetail();
-         this.chosenTasks();
+         // this.chosenTasks();
+         this.showTasks();
       },
 
       //-タスクを追加する処理を関数化
@@ -117,7 +148,6 @@ export default {
             comment: this.$store.getters['tasks/newItem'],
             working: true,
          };
-         // this.$store.state.tasks.todos.push(item);
          this.$store.commit('tasks/taskToDos', item);
          this.newItem = '';
       },
@@ -129,20 +159,63 @@ export default {
       changeButtonState(todo) {
          todo.working = !todo.working;
       },
-      //! 課題3-4 タスクのソートcommit 下記不可
-      // chosenTasks() {
-      //    this.$store.commit('tasks/chosenTasks')
-      // }
-      //-課題3-4 タスクのソート 下記でも実装可能だった。
-      // chosenTasks() {
-      //    setTimeout(() => {
-      //       this.$store.commit('tasks/chosenTasks');
-      //    }, 20);
+      //- conditionを引数に取り、実装してみましたが、うまくいきませんでした。
+      // chosenTasks(condition) {
+      //    this.$store.commit(
+      //       'tasks/duplicatedTodos',
+      //       this.$store.state.tasks.todos
+      //    );
+      //    if (condition === '作業中') {
+      //       console.log(condition);
+      //       let working = this.$store.getters['tasks/duplicatedTodos'].filter(
+      //          todo => todo.working === true
+      //       );
+      //       this.$store.state.tasks.duplicatedTodos = working;
+      //    } else if (condition === '完了') {
+      //       console.log(condition);
+      //       let complete = this.$store.getters['tasks/duplicatedTodos'].filter(
+      //          todo => todo.working === false
+      //       );
+      //       this.$store.state.tasks.duplicatedTodos = complete;
+      //    } else {
+      //       console.log(condition);
+      //       return this.$store.state.tasks.duplicatedTodos;
+      //    }
       // },
-      //-課題3-4 タスクのソート dispatchでアクションを実行
-      chosenTasks() {
-         this.$store.dispatch('tasks/chosenTasks')
-      }
+      showTasks() {
+         this.$store.commit(
+            'tasks/duplicatedTodos',
+            this.$store.state.tasks.todos
+         );
+         return this.$store.state.tasks.duplicatedTodos;
+      },
+   },
+   watch: {
+      condition: {
+         handler: function() {
+            this.$store.commit(
+               'tasks/duplicatedTodos',
+               this.$store.state.tasks.todos
+            );
+            if (this.condition === '作業中') {
+               console.log(this.condition);
+               let working = this.$store.getters[
+                  'tasks/duplicatedTodos'
+               ].filter(todo => todo.working === true);
+               this.$store.state.tasks.duplicatedTodos = working;
+            } else if (this.condition === '完了') {
+               console.log(this.condition);
+               let complete = this.$store.getters[
+                  'tasks/duplicatedTodos'
+               ].filter(todo => todo.working === false);
+               this.$store.state.tasks.duplicatedTodos = complete;
+            } else {
+               console.log(this.condition);
+               return this.$store.state.tasks.duplicatedTodos;
+            }
+         },
+         deep: true,
+      },
    },
 };
 </script>
