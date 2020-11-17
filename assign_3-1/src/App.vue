@@ -1,62 +1,29 @@
 <template>
    <div id="app">
       <h1>ToDoリスト</h1>
-      <h2>watchを使用して実装した場合 - こちらはうまく動きました</h2>
-
-      <!--  @click="chosenTasks(condition)"で
-      conditionをchosenTasksの引数で渡して実装した場合
-      実装できなかった。以下、試したコードです。
 
       <form name="radioConditions">
          <input
             type="radio"
             id="all"
             name="rdo"
-            v-model="condition"
             value="すべて"
-            @click="chosenTasks(condition)"
+            checked
+            @click="chosenTasks('すべて')"
          /><label for="all">すべて</label>
          <input
             type="radio"
             id="progress"
             name="rdo"
-            v-model="condition"
             value="作業中"
-            @click="chosenTasks(condition)"
+            @click="chosenTasks('作業中')"
          /><label for="progress">作業中</label>
          <input
             type="radio"
             id="complete"
             name="rdo"
-            v-model="condition"
             value="完了"
-            @click="chosenTasks(condition)"
-         /><label for="complete">完了</label>
-      </form>
- -->
-
-      <!-- watch用に上記コードを修正：こちらは機能しました。 -->
-      <form name="radioConditions">
-         <input
-            type="radio"
-            id="all"
-            name="rdo"
-            v-model="condition"
-            value="すべて"
-         /><label for="all">すべて</label>
-         <input
-            type="radio"
-            id="progress"
-            name="rdo"
-            v-model="condition"
-            value="作業中"
-         /><label for="progress">作業中</label>
-         <input
-            type="radio"
-            id="complete"
-            name="rdo"
-            v-model="condition"
-            value="完了"
+            @click="chosenTasks('完了')"
          /><label for="complete">完了</label>
       </form>
 
@@ -130,14 +97,12 @@ export default {
       addTask(event) {
          if (event.type === 'click') {
             this.addTaskDetail();
-            // this.chosenTasks();
             this.showTasks();
             return;
          }
          //-日本語入力中に確定した際にEnterキーのトリガーを走らせないようにする処理
          if (event.keyCode !== 13) return;
          this.addTaskDetail();
-         // this.chosenTasks();
          this.showTasks();
       },
 
@@ -159,62 +124,32 @@ export default {
       changeButtonState(todo) {
          todo.working = !todo.working;
       },
-      //- conditionを引数に取り、実装してみましたが、うまくいきませんでした。
-      // chosenTasks(condition) {
-      //    this.$store.commit(
-      //       'tasks/duplicatedTodos',
-      //       this.$store.state.tasks.todos
-      //    );
-      //    if (condition === '作業中') {
-      //       console.log(condition);
-      //       let working = this.$store.getters['tasks/duplicatedTodos'].filter(
-      //          todo => todo.working === true
-      //       );
-      //       this.$store.state.tasks.duplicatedTodos = working;
-      //    } else if (condition === '完了') {
-      //       console.log(condition);
-      //       let complete = this.$store.getters['tasks/duplicatedTodos'].filter(
-      //          todo => todo.working === false
-      //       );
-      //       this.$store.state.tasks.duplicatedTodos = complete;
-      //    } else {
-      //       console.log(condition);
-      //       return this.$store.state.tasks.duplicatedTodos;
-      //    }
-      // },
+      //- conditionを引数に取って実装し、うまくいきました！
+      chosenTasks(condition) {
+         this.$store.commit(
+            'tasks/duplicatedTodos',
+            this.$store.state.tasks.todos
+         );
+         if (condition === '作業中') {
+            let working = this.$store.getters['tasks/duplicatedTodos'].filter(
+               todo => todo.working === true
+            );
+            this.$store.state.tasks.duplicatedTodos = working;
+         } else if (condition === '完了') {
+            let complete = this.$store.getters['tasks/duplicatedTodos'].filter(
+               todo => todo.working === false
+            );
+            this.$store.state.tasks.duplicatedTodos = complete;
+         } else {
+            return this.$store.state.tasks.duplicatedTodos;
+         }
+      },
       showTasks() {
          this.$store.commit(
             'tasks/duplicatedTodos',
             this.$store.state.tasks.todos
          );
          return this.$store.state.tasks.duplicatedTodos;
-      },
-   },
-   watch: {
-      condition: {
-         handler: function() {
-            this.$store.commit(
-               'tasks/duplicatedTodos',
-               this.$store.state.tasks.todos
-            );
-            if (this.condition === '作業中') {
-               console.log(this.condition);
-               let working = this.$store.getters[
-                  'tasks/duplicatedTodos'
-               ].filter(todo => todo.working === true);
-               this.$store.state.tasks.duplicatedTodos = working;
-            } else if (this.condition === '完了') {
-               console.log(this.condition);
-               let complete = this.$store.getters[
-                  'tasks/duplicatedTodos'
-               ].filter(todo => todo.working === false);
-               this.$store.state.tasks.duplicatedTodos = complete;
-            } else {
-               console.log(this.condition);
-               return this.$store.state.tasks.duplicatedTodos;
-            }
-         },
-         deep: true,
       },
    },
 };
